@@ -6,7 +6,7 @@ class Person(models.Model):
     middle_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     birth_date = models.DateField()
-    phone = models.CharField(max_length=255)
+    phone = models.CharField(max_length=255,unique=True)
     city = models.CharField(max_length=255)
     street = models.CharField(max_length=255)
 
@@ -21,4 +21,7 @@ class NextOfKin(Person):
 
 class Patient(Person):
     first_visit = models.DateField(auto_now=True)
-    next_of_kin = models.OneToOneField(NextOfKin, on_delete=models.CASCADE)
+    next_of_kin = models.OneToOneField(NextOfKin,
+                                         on_delete=models.CASCADE, 
+                                         null=True,
+                                         blank=True)
