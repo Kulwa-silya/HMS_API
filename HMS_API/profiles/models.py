@@ -2,11 +2,13 @@ from django.db import models
 
 # Create your models here.
 class Person(models.Model):
+    choices = (('M','Male'),('F','Female'))
     first_name = models.CharField(max_length=255)
     middle_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
+    gender = models.CharField(max_length=5, choices=choices)
     birth_date = models.DateField()
-    phone = models.CharField(max_length=255,unique=True)
+    phone = models.CharField(max_length=12,unique=True)
     city = models.CharField(max_length=255)
     street = models.CharField(max_length=255)
 
@@ -25,3 +27,4 @@ class Patient(Person):
                                          on_delete=models.CASCADE, 
                                          null=True,
                                          blank=True)
+
