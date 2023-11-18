@@ -306,3 +306,42 @@ class StaffPerformanceEvaluation(models.Model):
     evaluation_date = models.DateField()
     performance_notes = models.TextField()
     # Add other necessary fields
+
+# models.py
+
+
+class Invoice(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    invoice_date = models.DateField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    # Add other necessary fields
+
+
+class Insurance(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    insurance_provider = models.CharField(max_length=100)
+    policy_number = models.CharField(max_length=50)
+    # Add other necessary fields
+
+
+# models.py
+
+class Test(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    # Add other necessary fields
+
+
+class TestResult(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    test = models.ForeignKey(Test, on_delete=models.CASCADE)
+    result_date = models.DateField()
+    result_description = models.TextField()
+    # Add other necessary fields
+
+
+class ImagingReport(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    description = models.TextField()
+    report_date = models.DateField()
+    # Add other necessary fields
