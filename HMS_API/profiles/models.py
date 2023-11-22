@@ -9,13 +9,18 @@ from django.db import models
 class User(models.Model):
     username = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=100)
-    # Add other necessary fields
+    
 
 
 class UserRole(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=50)
-    # Add other necessary fields
+
+class City(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
 
 
 class NextOfKin(models.Model):
@@ -26,7 +31,7 @@ class NextOfKin(models.Model):
     gender = models.CharField(max_length=6, choices=choices)
     birth_date = models.DateField()
     phone = models.CharField(max_length=12, unique=True)
-    city = models.CharField(max_length=255)
+    city = models.ForeignKey(City, on_delete=models.CASCADE)
     street = models.CharField(max_length=255)
 
     def __str__(self):
@@ -45,7 +50,7 @@ class Patient(models.Model):
     gender = models.CharField(max_length=6, choices=choices)
     birth_date = models.DateField()
     phone = models.CharField(max_length=12, unique=True)
-    city = models.CharField(max_length=255)
+    city = models.ForeignKey(City, on_delete=models.CASCADE)
     street = models.CharField(max_length=255)
 
     first_visit = models.DateField(auto_now=True)
@@ -64,13 +69,38 @@ class Patient(models.Model):
 #     date_of_visit = models.DateField(auto_now_add=True)
 #     reason_of_visit = models.TextField(max_length=1000)
 
+class Room(models.Model):
+    APPOINTMENT = 'APPOINTMENT'
+    PATIENT = 'PATIENT'
+
+    ROOM_TYPE_CHOICES = [
+        (APPOINTMENT, 'Appointment'),
+        (PATIENT, 'Patient'),
+    ]
+
+    number = models.CharField(max_length=2, default='00')
+    room_type = models.CharField(max_length=12, choices=ROOM_TYPE_CHOICES, default=PATIENT)
+
+    def __str__(self):
+        return 'room number '+self.number+'-'+self.room_type
+
+
+
+class Ward(models.Model):
+    name = models.CharField(max_length=100)
+    rooms = models.IntegerField()
+    beds_per_room = models.IntegerField()
+
+    def __str__(self):
+        return self.name
 
 class Admission(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     admission_date = models.DateField()
-    ward = models.CharField(max_length=50)
-    bed_number = models.IntegerField()
-    # Add other necessary fields
+    ward = models.ForeignKey(Ward, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True)
+    
+    
 
 
 class Discharge(models.Model):
@@ -86,11 +116,6 @@ class Doctor(models.Model):
 
 class Nurse(models.Model):
     name = models.CharField(max_length=100)
-    # Add other necessary fields
-
-
-class Room(models.Model):
-    room_number = models.IntegerField(unique=True)
     # Add other necessary fields
 
 
@@ -183,22 +208,29 @@ class Notification(models.Model):
     # Add other necessary fields
 
 
-# models.py
+
+
+
+    
+
+class Bed(models.Model):
+    ward = models.ForeignKey(Ward, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    bed_number = models.CharField(max_length=10)
+    
+
+    
 
 class EmergencyRoom(models.Model):
-    name = models.CharField(max_length=100)
+    ward = models.ForeignKey(Ward, on_delete=models.CASCADE, null=True, blank=True)
     capacity = models.IntegerField()
-    # Add other necessary fields
-
+    
 
 class CriticalPatient(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     emergency_room = models.ForeignKey(EmergencyRoom, on_delete=models.CASCADE)
     handling_notes = models.TextField()
-    # Add other necessary fields
-
-
-# models.py
+    
 
 class CustomReport(models.Model):
     name = models.CharField(max_length=100)

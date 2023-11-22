@@ -3,6 +3,8 @@ from .models import *
 from rest_framework import serializers
 
 
+
+
 class NextOfKinSerializer(serializers.ModelSerializer):
     class Meta:
         model = NextOfKin
@@ -295,4 +297,15 @@ class PatientFeedbackSerializer(serializers.ModelSerializer):
 class StaffPerformanceEvaluationSerializer(serializers.ModelSerializer):
     class Meta:
         model = StaffPerformanceEvaluation
+        fields = '__all__'
+
+
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = '__all__'
+
+class WardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ward
         fields = '__all__'

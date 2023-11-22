@@ -5,6 +5,8 @@ from rest_framework.routers import DefaultRouter
 from .views import *
 
 router = DefaultRouter()
+router.register(r'wards', WardViewSet, basename='ward')
+router.register(r'cities', CityViewSet, basename='city')
 router.register(r'patients', PatientViewSet, basename='patient')
 router.register(r'admissions', AdmissionViewSet, basename='admission')
 router.register(r'discharges', DischargeViewSet, basename='discharge')

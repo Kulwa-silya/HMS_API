@@ -7,6 +7,7 @@ from .models import *
 from .serializers import *
 
 
+
 # # Create your views here.
 # class PatientList(APIView):
 #     def get(self, request):
@@ -243,3 +244,13 @@ class PatientFeedbackViewSet(viewsets.ModelViewSet):
 class StaffPerformanceEvaluationViewSet(viewsets.ModelViewSet):
     queryset = StaffPerformanceEvaluation.objects.all()
     serializer_class = StaffPerformanceEvaluationSerializer
+
+
+class CityViewSet(viewsets.ModelViewSet):
+    queryset = City.objects.all()
+    serializer_class = CitySerializer
+
+
+class WardViewSet(viewsets.ModelViewSet):
+    queryset = Ward.objects.all()
+    serializer_class = WardSerializer
