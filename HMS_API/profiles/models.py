@@ -41,6 +41,13 @@ class NextOfKin(models.Model):
         ordering = ['first_name', 'last_name']
 
 
+class Insurance(models.Model):
+    insurance_provider = models.CharField(max_length=100)
+    policy_number = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.insurance_provider
+
 class Patient(models.Model):
     choices = (('Male', 'Male'), ('Female', 'Female'))
 
@@ -52,12 +59,14 @@ class Patient(models.Model):
     phone = models.CharField(max_length=12, unique=True)
     city = models.ForeignKey(City, on_delete=models.CASCADE)
     street = models.CharField(max_length=255)
-
+    insurance = models.OneToOneField(Insurance, on_delete=models.SET_NULL, null=True, blank=True)
+    
     first_visit = models.DateField(auto_now=True)
     next_of_kin = models.OneToOneField(NextOfKin,
                                        on_delete=models.CASCADE,
                                        null=True,
                                        blank=True)
+                                       
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
@@ -339,20 +348,31 @@ class StaffPerformanceEvaluation(models.Model):
     performance_notes = models.TextField()
     # Add other necessary fields
 
-# models.py
+
+
+class InvoiceCategory(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
 
 
 class Invoice(models.Model):
+    PAYMENT_METHOD_CHOICES = [
+        ('cash', 'Cash'),
+        ('insurance', 'Insurance'),
+    ]
+
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     invoice_date = models.DateField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    category = models.ForeignKey(InvoiceCategory, on_delete=models.CASCADE, default=0)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='cash')
     # Add other necessary fields
 
 
-class Insurance(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    insurance_provider = models.CharField(max_length=100)
-    policy_number = models.CharField(max_length=50)
+
+    
     # Add other necessary fields
 
 

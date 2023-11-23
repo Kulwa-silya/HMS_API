@@ -96,6 +96,12 @@ class InvoiceSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class InvoiceCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvoiceCategory
+        fields = '__all__'
+
+
 class InsuranceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Insurance

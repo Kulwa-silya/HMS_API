@@ -71,7 +71,10 @@ class DiagnosisViewSet(viewsets.ModelViewSet):
 class MedicationViewSet(viewsets.ModelViewSet):
     queryset = Medication.objects.all()
     serializer_class = MedicationSerializer
-# views.py
+
+class InvoiceCategoryViewSet(viewsets.ModelViewSet):
+    queryset = InvoiceCategory.objects.all()
+    serializer_class = InvoiceCategorySerializer
 
 
 class InvoiceViewSet(viewsets.ModelViewSet):
