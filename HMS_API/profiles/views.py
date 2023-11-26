@@ -42,14 +42,6 @@ class DischargeViewSet(viewsets.ModelViewSet):
     serializer_class = DischargeSerializer
 
 
-class DoctorViewSet(viewsets.ModelViewSet):
-    queryset = Doctor.objects.all()
-    serializer_class = DoctorSerializer
-
-
-class NurseViewSet(viewsets.ModelViewSet):
-    queryset = Nurse.objects.all()
-    serializer_class = NurseSerializer
 
 
 class RoomViewSet(viewsets.ModelViewSet):
@@ -112,12 +104,19 @@ class TestResultViewSet(viewsets.ModelViewSet):
 class ImagingReportViewSet(viewsets.ModelViewSet):
     queryset = ImagingReport.objects.all()
     serializer_class = ImagingReportSerializer
-# views.py
+
+
+
+class UserTypesViewSet(viewsets.ModelViewSet):
+    queryset = UserType.objects.all()
+    serializer_class = UserTypeSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
 
 
 class UserRoleViewSet(viewsets.ModelViewSet):

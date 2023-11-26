@@ -1,14 +1,23 @@
 from distutils.text_file import TextFile
 from django.db import models
-
+from django.contrib.auth.models import AbstractUser, Group,  Permission
 # Create your models here.
 
-# models.py
+class UserType(models.Model):
+    name = models.CharField(max_length=20, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
-class User(models.Model):
+class User(AbstractUser):
+    user_type = models.ForeignKey(UserType, on_delete=models.SET_NULL, null=True, blank=True)   
     username = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=100)
+    groups = models.ManyToManyField(Group, related_name='auth_user_groups', null=True, blank=True)
+    user_permissions = models.ManyToManyField(
+        Permission, related_name='auth_user_permissions',null=True, blank=True
+    )
     
 
 
@@ -117,60 +126,57 @@ class Discharge(models.Model):
     discharge_date = models.DateField()
 
 
-class Doctor(models.Model):
-    name = models.CharField(max_length=100)
-    specialization = models.CharField(max_length=100)
-    # Add other necessary fields
-
-
-class Nurse(models.Model):
-    name = models.CharField(max_length=100)
-    # Add other necessary fields
-
-
 class Appointment(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
-    nurse = models.ForeignKey(Nurse, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='patient_appointments')
+    doctor = models.ForeignKey(User, related_name='doctor_appointments',on_delete=models.CASCADE, limit_choices_to={'user_type__name': 'Doctor'})
+    nurse = models.ForeignKey(User, related_name='nurse_appointments',on_delete=models.CASCADE, limit_choices_to={'user_type__name': 'Nurse'})
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     appointment_date = models.DateTimeField()
-    # Add other necessary fields
+    
 
 
 class Diagnosis(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     diagnosis_date = models.DateField()
     description = models.TextField()
-    # Add other necessary fields
 
 
-# models.py
 
 class Medicine(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     quantity = models.IntegerField()
-    # Add other necessary fields
+    manufacturer = models.CharField(max_length=100, default='')
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=200)
+    expire_date = models.DateField(default='2023-01-01')
 
+    def __str__(self):
+        return self.name
 
 class Prescription(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'user_type__name': 'Doctor'})
+    issue_date = models.DateField()
+
+    def __str__(self):
+        return f"Prescription for {self.patient} by Dr. {self.doctor}"
+
+class PrescribedMedicine(models.Model):
+    prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE)
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
     dosage = models.CharField(max_length=50)
-    issue_date = models.DateField()
-    # Add other necessary fields
 
+    def __str__(self):
+        return f"{self.medicine.name} prescribed in {self.prescription}"
 
 class Medication(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     medication_date = models.DateField()
-    name = models.CharField(max_length=100)
-    dosage = models.CharField(max_length=50)
-    # Add other necessary fields
+    prescribed_medicine = models.ForeignKey(PrescribedMedicine, on_delete=models.CASCADE, null=True)
 
+    def __str__(self):
+        return f"Medication for {self.patient} on {self.medication_date}"
 
-# models.py
 
 class Budget(models.Model):
     name = models.CharField(max_length=100)
@@ -202,12 +208,10 @@ class AppointmentBooking(models.Model):
 
 class Communication(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    provider = models.ForeignKey(Doctor, on_delete=models.CASCADE)
+    provider = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'user_type__name': 'Doctor'})
     message = models.TextField()
     date = models.DateTimeField()
-    # Add other necessary fields
-
-# models.py
+    
 
 
 class Notification(models.Model):
@@ -233,12 +237,16 @@ class Bed(models.Model):
 class EmergencyRoom(models.Model):
     ward = models.ForeignKey(Ward, on_delete=models.CASCADE, null=True, blank=True)
     capacity = models.IntegerField()
+
+    
     
 
 class CriticalPatient(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     emergency_room = models.ForeignKey(EmergencyRoom, on_delete=models.CASCADE)
     handling_notes = models.TextField()
+
+    
     
 
 class CustomReport(models.Model):
@@ -286,7 +294,7 @@ class Certification(models.Model):
 
 class RemoteConsultation(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'user_type__name': 'Doctor'})
     consultation_date = models.DateTimeField()
     consultation_notes = models.TextField()
     # Add other necessary fields

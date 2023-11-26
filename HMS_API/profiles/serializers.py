@@ -1,4 +1,3 @@
-from .models import Doctor, Nurse, Room, Appointment
 from .models import *
 from rest_framework import serializers
 
@@ -52,16 +51,6 @@ class PatientSerializer(serializers.ModelSerializer):
 # serializers.py
 
 
-class DoctorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Doctor
-        fields = '__all__'
-
-
-class NurseSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Nurse
-        fields = '__all__'
 
 
 class RoomSerializer(serializers.ModelSerializer):
@@ -142,7 +131,13 @@ class ImagingReportSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# serializers.py
+
+class UserTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserType
+        fields = '__all__'
+
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
