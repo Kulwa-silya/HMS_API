@@ -119,13 +119,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 
-class UserRoleViewSet(viewsets.ModelViewSet):
-    queryset = UserRole.objects.all()
-    serializer_class = UserRoleSerializer
-
-# views.py
-
-
 class BudgetViewSet(viewsets.ModelViewSet):
     queryset = Budget.objects.all()
     serializer_class = BudgetSerializer

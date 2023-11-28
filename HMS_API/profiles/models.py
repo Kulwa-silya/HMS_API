@@ -11,7 +11,7 @@ class UserType(models.Model):
 
 
 class User(AbstractUser):
-    user_type = models.ForeignKey(UserType, on_delete=models.SET_NULL, null=True, blank=True)   
+    user_type = models.ForeignKey(UserType, on_delete=models.SET_NULL, null=True)   
     username = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=100)
     groups = models.ManyToManyField(Group, related_name='auth_user_groups', null=True, blank=True)

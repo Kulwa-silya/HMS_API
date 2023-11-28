@@ -2,8 +2,6 @@ from .models import *
 from rest_framework import serializers
 
 
-
-
 class NextOfKinSerializer(serializers.ModelSerializer):
     class Meta:
         model = NextOfKin
@@ -30,8 +28,7 @@ class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = '__all__'
-        # fields = ['id', 'first_name', 'middle_name', 'gender',
-        #           'last_name', 'birth_date', 'phone', 'city', 'street', 'next_of_kin']
+       
 
     def create(self, validated_data):
         next_of_kin = validated_data.pop('next_of_kin')
@@ -39,17 +36,6 @@ class PatientSerializer(serializers.ModelSerializer):
         patient_instance = Patient.objects.create(
             next_of_kin=next_of_kin_instance, **validated_data)
         return patient_instance
-
-
-# class PatientSerializer(serializers.ModelSerializer):
-#     admissions = AdmissionSerializer(many=True, read_only=True)
-#     discharges = DischargeSerializer(many=True, read_only=True)
-
-#     class Meta:
-#         model = Patient
-#         fields = '__all__'
-# serializers.py
-
 
 
 
@@ -63,7 +49,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = '__all__'
-# serializers.py
+
 
 
 class DiagnosisSerializer(serializers.ModelSerializer):
@@ -140,6 +126,7 @@ class UserTypeSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+     
     class Meta:
         model = User
         fields = '__all__'

@@ -19,9 +19,8 @@ router.register(r'invoices-categories', InvoiceCategoryViewSet, basename='invoic
 router.register(r'insurances', InsuranceViewSet, basename='insurance')
 router.register(r'medicines', MedicineViewSet, basename='medicine')
 router.register(r'prescriptions', PrescriptionViewSet, basename='prescription')
-router.register(r'users', UserViewSet, basename='user')
+router.register(r'users-employees', UserViewSet, basename='user-employees')
 router.register(r'user-types', UserTypesViewSet, basename='user-types')
-router.register(r'userroles', UserRoleViewSet, basename='userrole')
 router.register(r'budgets', BudgetViewSet, basename='budget')
 router.register(r'expenses', ExpenseViewSet, basename='expense')
 router.register(r'financialreports', FinancialReportViewSet,
