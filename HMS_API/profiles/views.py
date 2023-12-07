@@ -8,20 +8,6 @@ from .serializers import *
 
 
 
-# # Create your views here.
-# class PatientList(APIView):
-#     def get(self, request):
-#         queryset = Patient.objects.select_related('next_of_kin').all()
-#         serializer = PatientSerializer(queryset, many=True)
-#         return Response(serializer.data)
-
-#     def post(self, request):
-#         serializer = PatientSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
 class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.select_related('next_of_kin').all()
     serializer_class = PatientSerializer
@@ -40,7 +26,6 @@ class AdmissionViewSet(viewsets.ModelViewSet):
 class DischargeViewSet(viewsets.ModelViewSet):
     queryset = Discharge.objects.all()
     serializer_class = DischargeSerializer
-
 
 
 
@@ -77,7 +62,12 @@ class InvoiceViewSet(viewsets.ModelViewSet):
 class InsuranceViewSet(viewsets.ModelViewSet):
     queryset = Insurance.objects.all()
     serializer_class = InsuranceSerializer
-# views.py
+
+
+class InsuranceProviderViewSet(viewsets.ModelViewSet):
+    queryset = InsuranceProvider.objects.all()
+    serializer_class = InsuranceProviderSerializer
+
 
 
 class MedicineViewSet(viewsets.ModelViewSet):

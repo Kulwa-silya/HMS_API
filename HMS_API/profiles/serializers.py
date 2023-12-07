@@ -1,11 +1,19 @@
 from .models import *
 from rest_framework import serializers
+from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
+from django.contrib.auth import get_user_model
 
-
-class NextOfKinSerializer(serializers.ModelSerializer):
+class CitySerializer(serializers.ModelSerializer):
     class Meta:
-        model = NextOfKin
+        model = City
         fields = '__all__'
+
+
+# class NextOfKinSerializer(serializers.ModelSerializer):
+#     # city = CitySerializer()
+#     class Meta:
+#         model = NextOfKin
+#         fields = '__all__'
 
 
 class AdmissionSerializer(serializers.ModelSerializer):
@@ -21,22 +29,14 @@ class DischargeSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
-    next_of_kin = NextOfKinSerializer()
     admissions = AdmissionSerializer(many=True, read_only=True)
     discharges = DischargeSerializer(many=True, read_only=True)
+    
 
     class Meta:
         model = Patient
         fields = '__all__'
        
-
-    def create(self, validated_data):
-        next_of_kin = validated_data.pop('next_of_kin')
-        next_of_kin_instance = NextOfKin.objects.create(**next_of_kin)
-        patient_instance = Patient.objects.create(
-            next_of_kin=next_of_kin_instance, **validated_data)
-        return patient_instance
-
 
 
 class RoomSerializer(serializers.ModelSerializer):
@@ -62,7 +62,7 @@ class MedicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Medication
         fields = '__all__'
-# serializers.py
+
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
@@ -80,6 +80,11 @@ class InvoiceCategorySerializer(serializers.ModelSerializer):
 class InsuranceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Insurance
+        fields = '__all__'
+
+class InsuranceProviderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InsuranceProvider
         fields = '__all__'
 
 
@@ -126,10 +131,12 @@ class UserTypeSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-     
     class Meta:
         model = User
         fields = '__all__'
+
+
+
 
 
 class UserRoleSerializer(serializers.ModelSerializer):
@@ -277,9 +284,11 @@ class HospitalSupplySerializer(serializers.ModelSerializer):
 
 
 class PatientFeedbackSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = PatientFeedback
         fields = '__all__'
+        
 
 
 class StaffPerformanceEvaluationSerializer(serializers.ModelSerializer):
@@ -288,10 +297,7 @@ class StaffPerformanceEvaluationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = City
-        fields = '__all__'
+
 
 class WardSerializer(serializers.ModelSerializer):
     class Meta:

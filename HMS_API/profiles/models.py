@@ -1,6 +1,8 @@
 from distutils.text_file import TextFile
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group,  Permission
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.db import models
 # Create your models here.
 
 class UserType(models.Model):
@@ -21,6 +23,7 @@ class User(AbstractUser):
     
 
 
+
 class UserRole(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=50)
@@ -32,30 +35,32 @@ class City(models.Model):
         return self.name
 
 
-class NextOfKin(models.Model):
-    choices = (('Male', 'Male'), ('Female', 'Female'))
-    first_name = models.CharField(max_length=255)
-    middle_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    gender = models.CharField(max_length=6, choices=choices)
-    birth_date = models.DateField()
-    phone = models.CharField(max_length=12, unique=True)
-    city = models.ForeignKey(City, on_delete=models.CASCADE)
-    street = models.CharField(max_length=255)
+# class NextOfKin(models.Model):
+#     choices = (('Male', 'Male'), ('Female', 'Female'))
+#     first_name = models.CharField(max_length=255)
+#     middle_name = models.CharField(max_length=255)
+#     last_name = models.CharField(max_length=255)
+#     gender = models.CharField(max_length=6, choices=choices)
+#     birth_date = models.DateField()
+#     phone = models.CharField(max_length=12)
+#     city = models.ForeignKey(City, on_delete=models.CASCADE)
+#     street = models.CharField(max_length=255)
 
-    def __str__(self):
-        return f'{self.first_name} {self.last_name}'
+#     def __str__(self):
+#         return f'{self.first_name} {self.last_name}'
 
-    class Meta:
-        ordering = ['first_name', 'last_name']
+#     class Meta:
+#         ordering = ['first_name', 'last_name']
 
 
-class Insurance(models.Model):
-    insurance_provider = models.CharField(max_length=100)
+
+    
+class InsuranceProvider(models.Model):
+    name = models.CharField(max_length=100)
     policy_number = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.insurance_provider
+        return self.name
 
 class Patient(models.Model):
     choices = (('Male', 'Male'), ('Female', 'Female'))
@@ -68,13 +73,15 @@ class Patient(models.Model):
     phone = models.CharField(max_length=12, unique=True)
     city = models.ForeignKey(City, on_delete=models.CASCADE)
     street = models.CharField(max_length=255)
-    insurance = models.OneToOneField(Insurance, on_delete=models.SET_NULL, null=True, blank=True)
-    
     first_visit = models.DateField(auto_now=True)
-    next_of_kin = models.OneToOneField(NextOfKin,
-                                       on_delete=models.CASCADE,
-                                       null=True,
-                                       blank=True)
+
+    next_of_kin_first_name = models.CharField(max_length=255, default='abc')
+    next_of_kin_middle_name = models.CharField(max_length=255, default='abc')
+    next_of_kin_last_name = models.CharField(max_length=255, default='abc')
+    next_of_kin_gender = models.CharField(max_length=6, choices=choices, default='Male')
+    next_of_kin_phone = models.CharField(max_length=12, default='0717553945')
+    
+    
                                        
 
     def __str__(self):
@@ -83,9 +90,18 @@ class Patient(models.Model):
     class Meta:
         ordering = ['first_name', 'last_name']
 
-# class PatientHistory(models.Model):
-#     date_of_visit = models.DateField(auto_now_add=True)
-#     reason_of_visit = models.TextField(max_length=1000)
+
+class Insurance(models.Model):
+    card_number = models.IntegerField(default=0)
+    membership_number = models.IntegerField(default=0)
+    authorization_number = models.IntegerField(default=0, null=True)
+    provider = models.ForeignKey(InsuranceProvider, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, default=0)
+
+
+
+
+
 
 class Room(models.Model):
     APPOINTMENT = 'APPOINTMENT'
@@ -188,13 +204,13 @@ class Expense(models.Model):
     name = models.CharField(max_length=100)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
-    # Add other necessary fields
+    
 
 
 class FinancialReport(models.Model):
     name = models.CharField(max_length=100)
     content = models.TextField()
-    # Add other necessary fields
+    
 
 
 # models.py
@@ -203,7 +219,7 @@ class AppointmentBooking(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     appointment_date = models.DateTimeField()
     reason = models.TextField()
-    # Add other necessary fields
+    
 
 
 class Communication(models.Model):
@@ -218,7 +234,7 @@ class Notification(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     message = models.TextField()
     date = models.DateTimeField()
-    # Add other necessary fields
+    
 
 
 
@@ -372,19 +388,18 @@ class Invoice(models.Model):
     ]
 
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    invoice_date = models.DateField()
+    invoice_date = models.DateField(auto_now=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.ForeignKey(InvoiceCategory, on_delete=models.CASCADE, default=0)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='cash')
-    # Add other necessary fields
+
+
 
 
 
     
-    # Add other necessary fields
 
 
-# models.py
 
 class Test(models.Model):
     name = models.CharField(max_length=100)

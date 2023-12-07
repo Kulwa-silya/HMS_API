@@ -149,6 +149,8 @@ DJOSER = {
     {
         # 'user_create': 'tona_users.serializers.UserCreateSerializer',
         'user': 'profiles.serializers.UserSerializer',
+
+        
         
     }
 }
