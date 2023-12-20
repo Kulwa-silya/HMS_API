@@ -1,3 +1,5 @@
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import viewsets
@@ -5,16 +7,17 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import *
 from .serializers import *
+from .filters import *
 
+
+
+class GroupViewSet(viewsets.ModelViewSet):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
 
 
 class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.select_related('next_of_kin').all()
-    serializer_class = PatientSerializer
-
-
-class PatientViewSet(viewsets.ModelViewSet):
-    queryset = Patient.objects.all()
     serializer_class = PatientSerializer
 
 
@@ -78,17 +81,21 @@ class MedicineViewSet(viewsets.ModelViewSet):
 class PrescriptionViewSet(viewsets.ModelViewSet):
     queryset = Prescription.objects.all()
     serializer_class = PrescriptionSerializer
-# views.py
 
 
-class TestViewSet(viewsets.ModelViewSet):
-    queryset = Test.objects.all()
-    serializer_class = TestSerializer
+class PrescribedMedicineViewSet(viewsets.ModelViewSet):
+    queryset = PrescribedMedicine.objects.all()
+    serializer_class = PrescribedMedicineSerializer
 
 
-class TestResultViewSet(viewsets.ModelViewSet):
-    queryset = TestResult.objects.all()
-    serializer_class = TestResultSerializer
+class LabTestViewSet(viewsets.ModelViewSet):
+    queryset = LabTest.objects.all()
+    serializer_class = LabTestSerializer
+
+
+class LabTestResultViewSet(viewsets.ModelViewSet):
+    queryset = LabTestResult.objects.all()
+    serializer_class = LabTestResultSerializer
 
 
 class ImagingReportViewSet(viewsets.ModelViewSet):
@@ -97,9 +104,9 @@ class ImagingReportViewSet(viewsets.ModelViewSet):
 
 
 
-class UserTypesViewSet(viewsets.ModelViewSet):
-    queryset = UserType.objects.all()
-    serializer_class = UserTypeSerializer
+# class UserTypesViewSet(viewsets.ModelViewSet):
+#     queryset = UserType.objects.all()
+#     serializer_class = UserTypeSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -239,3 +246,10 @@ class CityViewSet(viewsets.ModelViewSet):
 class WardViewSet(viewsets.ModelViewSet):
     queryset = Ward.objects.all()
     serializer_class = WardSerializer
+
+class VitalSignsViewSet(viewsets.ModelViewSet):
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = VitalSignsFilter
+    search_fields = ['patient']
+    queryset = VitalSigns.objects.select_related('patient').all()
+    serializer_class = VitalSignsSerializer

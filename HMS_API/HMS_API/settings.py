@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'djoser',
+    'django_filters',
     'profiles',
     
 ]
@@ -141,7 +142,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
    'AUTH_HEADER_TYPES': ('JWT',),
-   'ACCESS_TOKEN_LIFETIME': timedelta(days=3),
+   'ACCESS_TOKEN_LIFETIME': timedelta(days=300),
 }
 
 DJOSER = {

@@ -3,30 +3,25 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group,  Permission
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
+from django.contrib.auth.models import User, Group
 # Create your models here.
 
-class UserType(models.Model):
-    name = models.CharField(max_length=20, unique=True)
+# class UserType(models.Model):
+#     name = models.CharField(max_length=20, unique=True)
 
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
 
 
-class User(AbstractUser):
-    user_type = models.ForeignKey(UserType, on_delete=models.SET_NULL, null=True)   
-    username = models.CharField(max_length=100, unique=True)
-    password = models.CharField(max_length=100)
-    groups = models.ManyToManyField(Group, related_name='auth_user_groups', null=True, blank=True)
-    user_permissions = models.ManyToManyField(
-        Permission, related_name='auth_user_permissions',null=True, blank=True
-    )
+
     
 
 
 
-class UserRole(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    role = models.CharField(max_length=50)
+# class UserRole(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     role = models.CharField(max_length=50)
+
 
 class City(models.Model):
     name = models.CharField(max_length=50)
@@ -73,7 +68,9 @@ class Patient(models.Model):
     phone = models.CharField(max_length=12, unique=True)
     city = models.ForeignKey(City, on_delete=models.CASCADE)
     street = models.CharField(max_length=255)
-    first_visit = models.DateField(auto_now=True)
+    first_visit = models.DateField(auto_now_add=True)
+    last_visit = models.DateField(auto_now=True)
+    
 
     next_of_kin_first_name = models.CharField(max_length=255, default='abc')
     next_of_kin_middle_name = models.CharField(max_length=255, default='abc')
@@ -91,11 +88,28 @@ class Patient(models.Model):
         ordering = ['first_name', 'last_name']
 
 
+class VitalSigns(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    heart_rate = models.IntegerField()
+    blood_pressure_systolic = models.IntegerField()
+    blood_pressure_diastolic = models.IntegerField()
+    temperature = models.DecimalField(max_digits=5, decimal_places=2)
+    respiratory_rate = models.IntegerField()
+    weight = models.IntegerField(default=0)
+    height = models.IntegerField(default=0)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Vital Signs for {self.patient} - {self.timestamp}'
+
+
+
+
 class Insurance(models.Model):
     card_number = models.IntegerField(default=0)
     membership_number = models.IntegerField(default=0)
     authorization_number = models.IntegerField(default=0, null=True)
-    provider = models.ForeignKey(InsuranceProvider, on_delete=models.CASCADE)
+    provider = models.ForeignKey(InsuranceProvider, on_delete=models.CASCADE, null=True)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, default=0)
 
 
@@ -144,8 +158,8 @@ class Discharge(models.Model):
 
 class Appointment(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='patient_appointments')
-    doctor = models.ForeignKey(User, related_name='doctor_appointments',on_delete=models.CASCADE, limit_choices_to={'user_type__name': 'Doctor'})
-    nurse = models.ForeignKey(User, related_name='nurse_appointments',on_delete=models.CASCADE, limit_choices_to={'user_type__name': 'Nurse'})
+    doctor = models.ForeignKey(User, related_name='doctor_appointments',on_delete=models.CASCADE, limit_choices_to={'groups__name': 'Doctor'})
+    nurse = models.ForeignKey(User, related_name='nurse_appointments',on_delete=models.CASCADE, limit_choices_to={'groups__name': 'Nurse'})
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     appointment_date = models.DateTimeField()
     
@@ -172,7 +186,7 @@ class Medicine(models.Model):
 class Prescription(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     doctor = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'user_type__name': 'Doctor'})
-    issue_date = models.DateField()
+    issue_date = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"Prescription for {self.patient} by Dr. {self.doctor}"
@@ -394,29 +408,43 @@ class Invoice(models.Model):
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='cash')
 
 
-
-
-
-    
-
-
-
-class Test(models.Model):
+class LabTest(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
-    # Add other necessary fields
 
+    def __str__(self):
+        return self.name
 
-class TestResult(models.Model):
+class LabTestRequest(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    test = models.ForeignKey(Test, on_delete=models.CASCADE)
-    result_date = models.DateField()
-    result_description = models.TextField()
-    # Add other necessary fields
+    requested_tests = models.ManyToManyField(LabTest)
+    request_date = models.DateField(auto_now_add=True)
+    notes = models.TextField(blank=True, null=True)
 
+    def __str__(self):
+        return f"Lab Test Request for {self.patient} on {self.request_date}"
+
+class LabTestResult(models.Model):
+    lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
+    result_date = models.DateField(auto_now_add=True)
+    results = models.TextField()
+
+    def __str__(self):
+        return f"Lab Test Result for {self.lab_test_request.patient} on {self.result_date}"
+
+    
 
 class ImagingReport(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     description = models.TextField()
     report_date = models.DateField()
-    # Add other necessary fields
+
+
+class User(AbstractUser):   
+    username = models.CharField(max_length=100, unique=True)
+    # password = models.CharField(max_length=100)
+    groups = models.ManyToManyField(Group, related_name='auth_user_groups', null=True, blank=True)
+    user_permissions = models.ManyToManyField(
+        Permission, related_name='auth_user_permissions',null=True, blank=True
+    )
+    

@@ -102,17 +102,21 @@ class PrescriptionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# serializers.py
-
-class TestSerializer(serializers.ModelSerializer):
+class PrescribedMedicineSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Test
+        model = PrescribedMedicine
         fields = '__all__'
 
 
-class TestResultSerializer(serializers.ModelSerializer):
+class LabTestSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TestResult
+        model = LabTest
+        fields = '__all__'
+
+
+class LabTestResultSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LabTestResult
         fields = '__all__'
 
 
@@ -123,10 +127,10 @@ class ImagingReportSerializer(serializers.ModelSerializer):
 
 
 
-class UserTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserType
-        fields = '__all__'
+# class UserTypeSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = UserType
+#         fields = '__all__'
 
 
 
@@ -136,13 +140,16 @@ class UserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
-
-
-class UserRoleSerializer(serializers.ModelSerializer):
+class GroupSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserRole
+        model = Group
         fields = '__all__'
+
+
+# class UserRoleSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = UserRole
+#         fields = '__all__'
 
 # serializers.py
 
@@ -302,4 +309,9 @@ class StaffPerformanceEvaluationSerializer(serializers.ModelSerializer):
 class WardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ward
+        fields = '__all__'
+
+class VitalSignsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VitalSigns
         fields = '__all__'
