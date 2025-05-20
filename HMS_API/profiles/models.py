@@ -4,23 +4,8 @@ from django.contrib.auth.models import AbstractUser, Group,  Permission
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 from django.contrib.auth.models import User, Group
+from django.core.validators import MinValueValidator
 # Create your models here.
-
-# class UserType(models.Model):
-#     name = models.CharField(max_length=20, unique=True)
-
-#     def __str__(self):
-#         return self.name
-
-
-
-    
-
-
-
-# class UserRole(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     role = models.CharField(max_length=50)
 
 
 class City(models.Model):
@@ -28,25 +13,6 @@ class City(models.Model):
 
     def __str__(self):
         return self.name
-
-
-# class NextOfKin(models.Model):
-#     choices = (('Male', 'Male'), ('Female', 'Female'))
-#     first_name = models.CharField(max_length=255)
-#     middle_name = models.CharField(max_length=255)
-#     last_name = models.CharField(max_length=255)
-#     gender = models.CharField(max_length=6, choices=choices)
-#     birth_date = models.DateField()
-#     phone = models.CharField(max_length=12)
-#     city = models.ForeignKey(City, on_delete=models.CASCADE)
-#     street = models.CharField(max_length=255)
-
-#     def __str__(self):
-#         return f'{self.first_name} {self.last_name}'
-
-#     class Meta:
-#         ordering = ['first_name', 'last_name']
-
 
 
     
@@ -175,7 +141,7 @@ class Diagnosis(models.Model):
 class Medicine(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
-    quantity = models.IntegerField()
+    quantity = models.IntegerField(validators=[MinValueValidator(0)])
     manufacturer = models.CharField(max_length=100, default='')
     price = models.DecimalField(max_digits=10, decimal_places=2, default=200)
     expire_date = models.DateField(default='2023-01-01')
@@ -185,7 +151,7 @@ class Medicine(models.Model):
 
 class Prescription(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'user_type__name': 'Doctor'})
+    doctor = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'groups__name': 'Doctor'})
     issue_date = models.DateField(auto_now_add=True)
 
     def __str__(self):
@@ -238,7 +204,7 @@ class AppointmentBooking(models.Model):
 
 class Communication(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    provider = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'user_type__name': 'Doctor'})
+    provider = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'groups__name': 'Doctor'})
     message = models.TextField()
     date = models.DateTimeField()
     
@@ -324,7 +290,7 @@ class Certification(models.Model):
 
 class RemoteConsultation(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'user_type__name': 'Doctor'})
+    doctor = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'groups__name': 'Doctor'})
     consultation_date = models.DateTimeField()
     consultation_notes = models.TextField()
     # Add other necessary fields
@@ -403,7 +369,7 @@ class Invoice(models.Model):
 
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     invoice_date = models.DateField(auto_now=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     category = models.ForeignKey(InvoiceCategory, on_delete=models.CASCADE, default=0)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='cash')
 

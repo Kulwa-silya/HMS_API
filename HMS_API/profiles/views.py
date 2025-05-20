@@ -5,29 +5,32 @@ from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAdminUser
 from .models import *
 from .serializers import *
 from .filters import *
+from .permissions import IsAdminOrReadOnly, IsDoctor
 
 
 
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
+    permission_classes = [IsAdminUser]
 
 
 class PatientViewSet(viewsets.ModelViewSet):
-    queryset = Patient.objects.select_related('next_of_kin').all()
+    queryset = Patient.objects.prefetch_related('admissions', 'discharges').all()
     serializer_class = PatientSerializer
 
 
 class AdmissionViewSet(viewsets.ModelViewSet):
-    queryset = Admission.objects.all()
+    queryset = Admission.objects.select_related('patient', 'ward', 'room').all()
     serializer_class = AdmissionSerializer
 
 
 class DischargeViewSet(viewsets.ModelViewSet):
-    queryset = Discharge.objects.all()
+    queryset = Discharge.objects.select_related('patient').all()
     serializer_class = DischargeSerializer
 
 
@@ -38,18 +41,18 @@ class RoomViewSet(viewsets.ModelViewSet):
 
 
 class AppointmentViewSet(viewsets.ModelViewSet):
-    queryset = Appointment.objects.all()
+    queryset = Appointment.objects.select_related('patient', 'doctor', 'nurse', 'room').all()
     serializer_class = AppointmentSerializer
 # views.py
 
 
 class DiagnosisViewSet(viewsets.ModelViewSet):
-    queryset = Diagnosis.objects.all()
+    queryset = Diagnosis.objects.select_related('patient').all()
     serializer_class = DiagnosisSerializer
 
 
 class MedicationViewSet(viewsets.ModelViewSet):
-    queryset = Medication.objects.all()
+    queryset = Medication.objects.select_related('patient', 'prescribed_medicine').all()
     serializer_class = MedicationSerializer
 
 class InvoiceCategoryViewSet(viewsets.ModelViewSet):
@@ -58,12 +61,12 @@ class InvoiceCategoryViewSet(viewsets.ModelViewSet):
 
 
 class InvoiceViewSet(viewsets.ModelViewSet):
-    queryset = Invoice.objects.all()
+    queryset = Invoice.objects.select_related('patient', 'category').all()
     serializer_class = InvoiceSerializer
 
 
 class InsuranceViewSet(viewsets.ModelViewSet):
-    queryset = Insurance.objects.all()
+    queryset = Insurance.objects.select_related('provider', 'patient').all()
     serializer_class = InsuranceSerializer
 
 
@@ -79,12 +82,13 @@ class MedicineViewSet(viewsets.ModelViewSet):
 
 
 class PrescriptionViewSet(viewsets.ModelViewSet):
-    queryset = Prescription.objects.all()
+    queryset = Prescription.objects.select_related('patient', 'doctor').all()
     serializer_class = PrescriptionSerializer
+    permission_classes = [IsDoctor]
 
 
 class PrescribedMedicineViewSet(viewsets.ModelViewSet):
-    queryset = PrescribedMedicine.objects.all()
+    queryset = PrescribedMedicine.objects.select_related('prescription', 'medicine').all()
     serializer_class = PrescribedMedicineSerializer
 
 
@@ -94,7 +98,7 @@ class LabTestViewSet(viewsets.ModelViewSet):
 
 
 class LabTestResultViewSet(viewsets.ModelViewSet):
-    queryset = LabTestResult.objects.all()
+    queryset = LabTestResult.objects.select_related('lab_test_request').all()
     serializer_class = LabTestResultSerializer
 
 
@@ -104,14 +108,10 @@ class ImagingReportViewSet(viewsets.ModelViewSet):
 
 
 
-# class UserTypesViewSet(viewsets.ModelViewSet):
-#     queryset = UserType.objects.all()
-#     serializer_class = UserTypeSerializer
-
-
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.prefetch_related('groups', 'user_permissions').all()
     serializer_class = UserSerializer
+    permission_classes = [IsAdminUser]
 
 
 
@@ -157,7 +157,7 @@ class EmergencyRoomViewSet(viewsets.ModelViewSet):
 
 
 class CriticalPatientViewSet(viewsets.ModelViewSet):
-    queryset = CriticalPatient.objects.all()
+    queryset = CriticalPatient.objects.select_related('patient', 'emergency_room').all()
     serializer_class = CriticalPatientSerializer
 # views.py
 
@@ -180,7 +180,7 @@ class StaffRecruitmentViewSet(viewsets.ModelViewSet):
 
 
 class OnboardingViewSet(viewsets.ModelViewSet):
-    queryset = Onboarding.objects.all()
+    queryset = Onboarding.objects.select_related('staff').all()
     serializer_class = OnboardingSerializer
 
 
@@ -190,23 +190,23 @@ class TrainingViewSet(viewsets.ModelViewSet):
 
 
 class CertificationViewSet(viewsets.ModelViewSet):
-    queryset = Certification.objects.all()
+    queryset = Certification.objects.select_related('staff', 'training').all()
     serializer_class = CertificationSerializer
 # views.py
 
 
 class RemoteConsultationViewSet(viewsets.ModelViewSet):
-    queryset = RemoteConsultation.objects.all()
+    queryset = RemoteConsultation.objects.select_related('patient', 'doctor').all()
     serializer_class = RemoteConsultationSerializer
 
 
 class VideoConferenceViewSet(viewsets.ModelViewSet):
-    queryset = VideoConference.objects.all()
+    queryset = VideoConference.objects.select_related('consultation').all()
     serializer_class = VideoConferenceSerializer
 
 
 class ChatViewSet(viewsets.ModelViewSet):
-    queryset = Chat.objects.all()
+    queryset = Chat.objects.select_related('consultation', 'sender').all()
     serializer_class = ChatSerializer
 # views.py
 
@@ -217,7 +217,7 @@ class RegulatoryComplianceViewSet(viewsets.ModelViewSet):
 
 
 class QualityAssuranceViewSet(viewsets.ModelViewSet):
-    queryset = QualityAssurance.objects.all()
+    queryset = QualityAssurance.objects.select_related('staff').all()
     serializer_class = QualityAssuranceSerializer
 # views.py
 
@@ -229,12 +229,12 @@ class HospitalSupplyViewSet(viewsets.ModelViewSet):
 
 
 class PatientFeedbackViewSet(viewsets.ModelViewSet):
-    queryset = PatientFeedback.objects.all()
+    queryset = PatientFeedback.objects.select_related('patient').all()
     serializer_class = PatientFeedbackSerializer
 
 
 class StaffPerformanceEvaluationViewSet(viewsets.ModelViewSet):
-    queryset = StaffPerformanceEvaluation.objects.all()
+    queryset = StaffPerformanceEvaluation.objects.select_related('staff').all()
     serializer_class = StaffPerformanceEvaluationSerializer
 
 
