@@ -2,18 +2,12 @@ from .models import *
 from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 class CitySerializer(serializers.ModelSerializer):
     class Meta:
         model = City
         fields = '__all__'
-
-
-# class NextOfKinSerializer(serializers.ModelSerializer):
-#     # city = CitySerializer()
-#     class Meta:
-#         model = NextOfKin
-#         fields = '__all__'
 
 
 class AdmissionSerializer(serializers.ModelSerializer):
@@ -36,6 +30,7 @@ class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = '__all__'
+        read_only_fields = ('first_visit', 'last_visit')
        
 
 
@@ -49,6 +44,11 @@ class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = '__all__'
+
+    def validate_appointment_date(self, value):
+        if value < timezone.now():
+            raise serializers.ValidationError("Appointment date cannot be in the past.")
+        return value
 
 
 
@@ -69,6 +69,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
         fields = '__all__'
+        read_only_fields = ('invoice_date',)
 
 
 class InvoiceCategorySerializer(serializers.ModelSerializer):
@@ -100,6 +101,7 @@ class PrescriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prescription
         fields = '__all__'
+        read_only_fields = ('issue_date',)
 
 
 class PrescribedMedicineSerializer(serializers.ModelSerializer):
@@ -118,6 +120,7 @@ class LabTestResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = LabTestResult
         fields = '__all__'
+        read_only_fields = ('result_date',)
 
 
 class ImagingReportSerializer(serializers.ModelSerializer):
@@ -127,17 +130,11 @@ class ImagingReportSerializer(serializers.ModelSerializer):
 
 
 
-# class UserTypeSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = UserType
-#         fields = '__all__'
-
-
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'groups', 'is_staff', 'is_active', 'date_joined', 'last_login')
+        read_only_fields = ('last_login', 'date_joined', 'is_staff', 'is_active')
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -145,11 +142,6 @@ class GroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = '__all__'
 
-
-# class UserRoleSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = UserRole
-#         fields = '__all__'
 
 # serializers.py
 
@@ -266,6 +258,7 @@ class ChatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chat
         fields = '__all__'
+        read_only_fields = ('timestamp',)
 # serializers.py
 
 
@@ -315,3 +308,14 @@ class VitalSignsSerializer(serializers.ModelSerializer):
     class Meta:
         model = VitalSigns
         fields = '__all__'
+
+    def validate(self, data):
+        systolic = data.get('blood_pressure_systolic')
+        diastolic = data.get('blood_pressure_diastolic')
+
+        if systolic is not None and diastolic is not None and systolic <= diastolic:
+            raise serializers.ValidationError({
+                'blood_pressure_systolic': 'Systolic pressure must be greater than diastolic pressure.',
+                'blood_pressure_diastolic': 'Systolic pressure must be greater than diastolic pressure.'
+            })
+        return data
